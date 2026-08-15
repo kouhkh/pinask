@@ -1,0 +1,141 @@
+#pinask-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  pointer-events: none;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+#pinask-root[hidden] { display: none; }
+#pinask-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 16, 22, .42);
+  cursor: crosshair;
+  pointer-events: auto;
+}
+#pinask-hover, .pinask-mark {
+  position: absolute;
+  border: 2px solid #5b9dff;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.7) inset;
+  pointer-events: none;
+}
+#pinask-hover { background: rgba(91, 157, 255, .12); display: none; }
+.pinask-mark { background: rgba(194, 58, 58, .16); border-color: #e05a5a; }
+#pinask-tip {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  max-width: 420px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  color: #fff;
+  background: #1d2a3d;
+  font-size: 11px;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#pinask-dock {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+  pointer-events: auto;
+  width: min(380px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid #d7deea;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(20, 30, 50, .18);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #1d2a3d;
+}
+#pinask-dock p { margin: 0; color: #5b6573; font-size: 12px; line-height: 1.45; }
+#pinask-picks { display: flex; flex-wrap: wrap; gap: 6px; min-height: 8px; }
+.pinask-chip {
+  max-width: 100%;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #8a4b12;
+  background: #fff4e5;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#pinask-question {
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 8px;
+  border: 1px solid #c5cedb;
+  border-radius: 7px;
+  resize: vertical;
+  box-sizing: border-box;
+  font: inherit;
+}
+.pinask-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pinask-btn {
+  border: 1px solid #c5cedb;
+  border-radius: 8px;
+  background: #f4f7fb;
+  color: #1d2a3d;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pinask-btn.primary {
+  background: #1d4f91;
+  border-color: #1d4f91;
+  color: #fff;
+  font-weight: 700;
+}
+.pinask-btn.text {
+  border: 0;
+  background: transparent;
+  color: #3d4a5c;
+}
+#pinask-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 88px;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: none;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #1d2a3d;
+  color: #fff;
+  font-size: 12px;
+  pointer-events: none;
+}
+#pinask-hint {
+  position: fixed;
+  z-index: 2147483645;
+  right: 12px;
+  bottom: 12px;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 248, 224, .92);
+  color: #8a5a12;
+  font: 600 12px/1.4 "Segoe UI", system-ui, sans-serif;
+  box-shadow: 0 2px 8px rgba(20, 30, 50, .12);
+  pointer-events: none;
+}
+#pinask-hint kbd {
+  padding: 0 5px;
+  border: 1px solid #d7b056;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  color: #5a420c;
+  background: #fff8e0;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+#pinask-hint[hidden] { display: none; }

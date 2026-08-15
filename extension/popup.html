@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font: 13px/1.4 "Segoe UI", system-ui, sans-serif; margin: 0; padding: 12px; width: 320px; color: #1d2a3d; }
+    h1 { font-size: 14px; margin: 0 0 8px; }
+    label { display: block; margin: 8px 0; }
+    input[type="text"] { width: 100%; box-sizing: border-box; padding: 6px; }
+    button { margin-right: 6px; margin-top: 6px; }
+    ul { padding-left: 16px; max-height: 180px; overflow: auto; }
+    .muted { color: #5b6573; }
+  </style>
+</head>
+<body>
+  <h1>PinAsk</h1>
+  <p class="muted">标注存在浏览器本地。填了服务器地址才会同步。</p>
+  <label>快捷键 <input id="hotkey" type="text" placeholder="F9" /></label>
+  <label>服务器 POST 地址 <input id="endpoint" type="text" placeholder="http://127.0.0.1:8788/api/pinask" /></label>
+  <label><input id="showHint" type="checkbox" /> 角落提示（不挤占页面布局）</label>
+  <button id="save" type="button">保存设置</button>
+  <button id="export" type="button">导出 JSON</button>
+  <p id="status" class="muted"></p>
+  <ul id="list"></ul>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "hotkey": "F9",
+  "host": "127.0.0.1",
+  "port": 8788,
+  "dataDir": "data",
+  "showHint": false,
+  "endpoint": "/api/pinask"
+}

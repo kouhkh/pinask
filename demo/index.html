@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PinAsk demo</title>
+  <link rel="stylesheet" href="/overlay/pinask.css" />
+  <style>
+    :root { font-family: "Segoe UI", system-ui, sans-serif; color: #1d2a3d; }
+    body { margin: 0; background: #f4f7fb; }
+    main { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    .lead { color: #5b6573; margin: 0 0 24px; }
+    section { background: #fff; border: 1px solid #d7deea; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    label { display: block; margin: 0 0 10px; font-size: 13px; }
+    input, select { width: 100%; box-sizing: border-box; margin-top: 4px; padding: 8px; border: 1px solid #c5cedb; border-radius: 8px; }
+    button { padding: 8px 12px; border-radius: 8px; border: 1px solid #1d4f91; background: #1d4f91; color: #fff; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>PinAsk demo</h1>
+    <p class="lead">这是一个假设置页。按 F9 冻结画面，点选元素，写下问题后保存。数据进本仓库 <code>data/items/</code>。</p>
+    <section aria-label="账号">
+      <h2>账号</h2>
+      <label>显示名 <input id="displayName" value="示例用户" /></label>
+      <label>邮箱 <input id="email" type="email" value="demo@example.com" /></label>
+    </section>
+    <section aria-label="通知">
+      <h2>通知</h2>
+      <label><input type="checkbox" checked /> 邮件摘要</label>
+      <label>频率
+        <select id="freq">
+          <option>每天</option>
+          <option>每周</option>
+        </select>
+      </label>
+    </section>
+    <button type="button" id="saveFake">保存设置（假按钮）</button>
+  </main>
+  <script src="/overlay/pinask.js"></script>
+  <script>
+    fetch("/pinask.config.json")
+      .then((r) => r.json())
+      .then((cfg) => {
+        PinAsk.mount({
+          hotkey: cfg.hotkey || "F9",
+          endpoint: cfg.endpoint || "/api/pinask",
+          storage: "server",
+          showHint: Boolean(cfg.showHint),
+          source: "demo",
+          context: () => ({ page: "demo" }),
+        });
+      })
+      .catch(() => PinAsk.mount({ source: "demo" }));
+  </script>
+</body>
+</html>
