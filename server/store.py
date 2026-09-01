@@ -51,6 +51,11 @@ def save_batch(payload: dict[str, Any], data_dir: Path) -> dict[str, Any]:
         "status": "open",
         "question": question,
         "ui_elements": ui_elements,
+        "selection_groups": [
+            dict(row)
+            for row in payload.get("selection_groups") or []
+            if isinstance(row, dict) and row.get("id") and row.get("label")
+        ],
         "scene": dict(payload.get("scene") or {}),
         "source": str(payload.get("source") or "overlay"),
     }

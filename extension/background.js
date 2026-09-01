@@ -11,6 +11,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       status: "open",
       question: batch.question,
       ui_elements: batch.ui_elements || [],
+      selection_groups: batch.selection_groups || [],
       scene: batch.scene || {},
       source: "extension",
     };

@@ -28,7 +28,14 @@ class StoreTests(unittest.TestCase):
             saved = save_batch(
                 {
                     "question": "未挂树展开后是空的",
-                    "ui_elements": [{"selector": "#gapTree", "tag": "div", "name": "未挂装饰装修树"}],
+                    "ui_elements": [{"selector": "#gapTree", "tag": "div", "name": "未挂装饰装修树", "groups": [
+                        {"id": "red", "label": "红组", "color": "#e05a5a"},
+                        {"id": "blue", "label": "蓝组", "color": "#3978d4"},
+                    ]}],
+                    "selection_groups": [
+                        {"id": "red", "label": "红组", "color": "#e05a5a"},
+                        {"id": "blue", "label": "蓝组", "color": "#3978d4"},
+                    ],
                     "scene": {"href": "http://127.0.0.1:8778/"},
                     "source": "demo",
                 },
@@ -39,6 +46,8 @@ class StoreTests(unittest.TestCase):
             opened = list_items(data_dir, "open")
             self.assertEqual(len(opened["items"]), 1)
             self.assertEqual(opened["items"][0]["ui_elements"][0]["selector"], "#gapTree")
+            self.assertEqual([group["id"] for group in opened["items"][0]["ui_elements"][0]["groups"]], ["red", "blue"])
+            self.assertEqual(opened["items"][0]["selection_groups"][1]["label"], "蓝组")
             item_id = saved["id"]
             self.assertEqual(get_item(data_dir, item_id)["item"]["question"], "未挂树展开后是空的")
             resolved = set_status(data_dir, item_id, "resolved")
