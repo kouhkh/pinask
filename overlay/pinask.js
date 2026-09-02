@@ -166,6 +166,15 @@
     return left <= rect.right && right >= rect.left && top <= rect.bottom && bottom >= rect.top;
   }
 
+  function frameSelectsRect(frame, rect) {
+    if (!intersects(rect.left, rect.top, rect.right, rect.bottom, frame)) return false;
+    const frameStrictlyInsideElement = rect.left < frame.left
+      && rect.top < frame.top
+      && rect.right > frame.right
+      && rect.bottom > frame.bottom;
+    return !frameStrictlyInsideElement;
+  }
+
   function frameCandidates(frame) {
     const selector = [
       "button", "a[href]", "input", "textarea", "select", "option", "label", "summary", "details",
@@ -179,14 +188,13 @@
       const style = getComputedStyle(el);
       if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) continue;
       const rect = el.getBoundingClientRect();
-      if (rect.width < 2 || rect.height < 2 || !intersects(rect.left, rect.top, rect.right, rect.bottom, frame)) continue;
+      if (rect.width < 2 || rect.height < 2 || !frameSelectsRect(frame, rect)) continue;
       const item = describeEl(el);
       if (!item.selector || seen.has(item.selector)) continue;
       seen.add(item.selector);
-      rows.push({ el, item, area: rect.width * rect.height });
+      rows.push(item);
     }
-    const leaves = rows.filter((row) => !rows.some((other) => other !== row && row.el.contains(other.el) && other.area < row.area));
-    return (leaves.length ? leaves : rows).map((row) => row.item).slice(0, 80);
+    return rows.slice(0, 80);
   }
 
   function placeBox(node, box) {
@@ -622,6 +630,7 @@
     mount,
     setOn,
     defaults: DEFAULTS,
+    geometry: Object.freeze({ frameSelectsRect }),
     get options() { return { ...state.opts }; },
   };
 })();
