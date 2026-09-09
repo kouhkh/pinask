@@ -35,3 +35,9 @@ py -3.13 server/start.py
 ## Cursor
 
 个人 skill 在 `~/.cursor/skills/pinask/`。在宿主项目里说「按 PinAsk 标注改」，agent 会拉 `open` 项、改 UI、标 resolved。持续改可用 loop 轮询 `python server/watch.py`。
+
+## 选择位置与回归检查
+
+当前选择的标记通过捕获 `scroll`（含嵌套滚动）及 `resize`，在下一动画帧重新定位；保存的元素坐标同步更新。框选遍历有可见矩形的页面元素，保留包含/边界相交规则和 `data-pinask-ignore`，不再因标签不在列表或超过 80 项静默漏选。宿主仍应把浮球/工具栏等不参与框选的 UI 标记为 `data-pinask-ignore`。
+
+`node tests/overlay_geometry.test.mjs` 验证纯几何；`tests/browser-selection.html` 是一次性本地浏览器夹具（重新运行先刷新），可由独立 runner 打开并点“运行独立回归”。夹具验证窗口及嵌套滚动、resize 事件后的布局、保存坐标、完整包含/四边相交、外包/忽略/不相交排除、多组与取消某组、95 元素无截断。夹具使用 PointerEvent 合成框选事件并禁用其指针捕获，仅用于验证真实 DOM 几何及 overlay 事件处理，不等同硬件拖拽端到端测试；不连接保存 API。
