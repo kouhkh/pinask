@@ -8,6 +8,7 @@
     context: null,
     onSave: null,
     showHint: false,
+    historyUrl: null,
     source: "overlay",
   };
 
@@ -485,6 +486,7 @@
             <span id="pinask-group-menu" role="menu" hidden></span>
           </span>
           <button class="pinask-btn text" type="button" id="pinask-clear">清空本批</button>
+          <a class="pinask-btn text" id="pinask-history" hidden target="_blank" rel="noopener noreferrer">反馈历史</a>
           <button class="pinask-btn text" type="button" id="pinask-exit">退出</button>
         </div>
       </aside>
@@ -621,6 +623,18 @@
     ensureStyle();
     ensureDom();
     $("pinask-dock").querySelector("kbd").textContent = state.opts.hotkey;
+    const history = $("pinask-history");
+    history.hidden = true;
+    history.removeAttribute("href");
+    if (state.opts.historyUrl) {
+      try {
+        const url = new URL(state.opts.historyUrl, location.href);
+        if (["http:", "https:"].includes(url.protocol)) {
+          history.href = url.href;
+          history.hidden = false;
+        }
+      } catch (_error) { /* Invalid optional history URL: keep the link hidden. */ }
+    }
     ensureHint();
     wire();
     return window.PinAsk;

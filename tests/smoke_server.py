@@ -26,6 +26,11 @@ def req(method: str, path: str, payload: dict | None = None) -> dict:
         return json.loads(response.read().decode("utf-8"))
 
 
+def text_req(path: str) -> str:
+    with urllib.request.urlopen(BASE + path, timeout=5) as response:
+        return response.read().decode("utf-8")
+
+
 def main() -> None:
     proc = subprocess.Popen(
         [PY, str(ROOT / "server" / "server.py"), "--port", str(PORT)],
@@ -38,6 +43,8 @@ def main() -> None:
                 break
             except (urllib.error.URLError, TimeoutError):
                 time.sleep(0.15)
+        status_page = text_req("/status.html")
+        assert "反馈与处理会话" in status_page
         saved = req(
             "POST",
             "/api/pinask",
@@ -48,6 +55,8 @@ def main() -> None:
         )
         listed = req("GET", "/api/pinask?status=open")
         patched = req("PATCH", f"/api/pinask/{saved['id']}", {"status": "resolved"})
+        session = req("PATCH", f"/api/pinask/{saved['id']}/session", {"id": "smoke-run", "status": "waiting_test", "summary": "等待测试确认"})
+        assert session["item"]["session"]["status"] == "waiting_test"
         out = ROOT / "data" / "_smoke.json"
         out.write_text(
             json.dumps(

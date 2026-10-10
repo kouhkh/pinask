@@ -30,11 +30,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=load_port())
     parser.add_argument("--no-open", action="store_true")
+    parser.add_argument("--data-dir", type=Path)
     args = parser.parse_args()
     url = f"http://127.0.0.1:{args.port}/"
-    process = subprocess.Popen(
-        [sys.executable, str(HERE / "server.py"), "--port", str(args.port)]
-    )
+    command = [sys.executable, str(HERE / "server.py"), "--port", str(args.port)]
+    if args.data_dir:
+        command.extend(["--data-dir", str(args.data_dir.expanduser().resolve())])
+    process = subprocess.Popen(command)
     try:
         if not args.no_open:
             time.sleep(0.6)

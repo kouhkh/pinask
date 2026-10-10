@@ -97,3 +97,43 @@ def set_status(data_dir: Path, item_id: str, status: str) -> dict[str, Any]:
     item["updated_at"] = now_iso()
     _write_item(path, item)
     return {"ok": True, "item": item}
+
+
+SESSION_STATUSES = {
+    "queued",
+    "running",
+    "waiting_test",
+    "succeeded",
+    "failed",
+    "paused",
+    "canceled",
+    "unknown",
+}
+
+
+def set_session(data_dir: Path, item_id: str, session: dict[str, Any]) -> dict[str, Any]:
+    """Attach a project-defined processing session to one feedback item.
+
+    PinAsk deliberately treats this as opaque progress metadata.  The caller
+    may be a coding-agent adapter, a human workflow, or another tool.
+    """
+    if not isinstance(session, dict):
+        raise ValueError("session 必须是 JSON 对象")
+    status = str(session.get("status") or "unknown").strip()
+    if status not in SESSION_STATUSES:
+        raise ValueError("session.status 不是受支持的状态")
+    path = items_dir(data_dir) / f"{item_id}.json"
+    if not path.is_file():
+        raise FileNotFoundError(f"找不到标注 {item_id}")
+    item = _read_item(path)
+    item["session"] = {
+        "id": str(session.get("id") or session.get("session_id") or "").strip() or None,
+        "status": status,
+        "label": str(session.get("label") or "").strip() or None,
+        "summary": str(session.get("summary") or "").strip() or None,
+        "preview_url": str(session.get("preview_url") or "").strip() or None,
+        "updated_at": str(session.get("updated_at") or now_iso()),
+    }
+    item["updated_at"] = now_iso()
+    _write_item(path, item)
+    return {"ok": True, "item": item}

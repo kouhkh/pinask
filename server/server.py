@@ -16,7 +16,7 @@ if sys.version_info < (3, 10):
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from server.store import get_item, list_items, save_batch, set_status  # noqa: E402
+from server.store import get_item, list_items, save_batch, set_session, set_status  # noqa: E402
 
 
 def load_config() -> dict[str, Any]:
@@ -39,6 +39,10 @@ DATA_DIR = (ROOT / str(CFG.get("dataDir") or "data")).resolve()
 STATIC = {
     "/": ROOT / "demo" / "index.html",
     "/index.html": ROOT / "demo" / "index.html",
+    "/status": ROOT / "demo" / "status.html",
+    "/status.html": ROOT / "demo" / "status.html",
+    "/status.css": ROOT / "demo" / "status.css",
+    "/status.js": ROOT / "demo" / "status.js",
     "/overlay/pinask.js": ROOT / "overlay" / "pinask.js",
     "/overlay/pinask.css": ROOT / "overlay" / "pinask.css",
     "/pinask.config.json": ROOT / "pinask.config.json",
@@ -107,7 +111,19 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, list_items(DATA_DIR, status))
             return
         if parsed.path.startswith("/api/pinask/"):
-            item_id = parsed.path.rsplit("/", 1)[-1]
+            parts = parsed.path.strip("/").split("/")
+            item_id = parts[-1]
+            if len(parts) == 4 and parts[-1] == "session":
+                item_id = parts[-2]
+            if len(parts) == 4 and parts[-1] == "session":
+                # Session metadata is included in the normal item response;
+                # this route exists for clients that prefer a focused lookup.
+                try:
+                    item = get_item(DATA_DIR, item_id)["item"]
+                    self._json(200, {"ok": True, "session": item.get("session")})
+                except FileNotFoundError as exc:
+                    self._json(404, {"ok": False, "error": str(exc)})
+                return
             try:
                 self._json(200, get_item(DATA_DIR, item_id))
             except FileNotFoundError as exc:
@@ -133,7 +149,11 @@ class Handler(BaseHTTPRequestHandler):
         try:
             payload = self._body_json()
             if parsed.path.startswith("/api/pinask/"):
-                item_id = parsed.path.rsplit("/", 1)[-1]
+                parts = parsed.path.strip("/").split("/")
+                if len(parts) == 4 and parts[-1] == "session":
+                    self._json(200, set_session(DATA_DIR, parts[-2], payload))
+                    return
+                item_id = parts[-1]
                 self._json(200, set_status(DATA_DIR, item_id, str(payload.get("status") or "")))
                 return
             self._json(404, {"ok": False, "error": "not found"})
@@ -147,11 +167,15 @@ class Handler(BaseHTTPRequestHandler):
 
 def main() -> None:
     import argparse
+    global DATA_DIR
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default=str(CFG.get("host") or "127.0.0.1"))
     parser.add_argument("--port", type=int, default=int(CFG.get("port") or 8788))
+    parser.add_argument("--data-dir", type=Path, help="此实例独立保存反馈的目录")
     args = parser.parse_args()
+    if args.data_dir:
+        DATA_DIR = args.data_dir.expanduser().resolve()
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"pinask http://{args.host}:{args.port}/")
     try:

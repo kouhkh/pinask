@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from server.store import get_item, list_items, save_batch, set_status
+from server.store import get_item, list_items, save_batch, set_session, set_status
 
 
 class StoreTests(unittest.TestCase):
@@ -53,6 +53,20 @@ class StoreTests(unittest.TestCase):
             resolved = set_status(data_dir, item_id, "resolved")
             self.assertEqual(resolved["item"]["status"], "resolved")
             self.assertEqual(list_items(data_dir, "open")["items"], [])
+
+    def test_processing_session_is_opaque_progress_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            data_dir = Path(temp_dir)
+            saved = save_batch({"question": "按钮没有反馈", "ui_elements": [{"selector": "#submit"}]}, data_dir)
+            updated = set_session(
+                data_dir,
+                saved["id"],
+                {"id": "agent-run-1", "status": "waiting_test", "summary": "已生成隔离预览"},
+            )
+            self.assertEqual(updated["item"]["session"]["status"], "waiting_test")
+            self.assertEqual(get_item(data_dir, saved["id"])["item"]["session"]["id"], "agent-run-1")
+            with self.assertRaisesRegex(ValueError, "session.status"):
+                set_session(data_dir, saved["id"], {"status": "deployed"})
 
 
 if __name__ == "__main__":

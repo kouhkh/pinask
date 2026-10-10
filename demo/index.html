@@ -20,7 +20,7 @@
 <body>
   <main>
     <h1>PinAsk demo</h1>
-    <p class="lead">这是一个假设置页。按 F9 冻结画面，点选元素，写下问题后保存。数据进本仓库 <code>data/items/</code>。</p>
+    <p class="lead">这是一个假设置页。按 F9 冻结画面，点选元素，写下问题后保存。数据进本仓库 <code>data/items/</code>。可以打开 <a href="/status.html">状态页</a> 查看处理记录。</p>
     <section aria-label="账号">
       <h2>账号</h2>
       <label>显示名 <input id="displayName" value="示例用户" /></label>
@@ -43,16 +43,25 @@
     fetch("/pinask.config.json")
       .then((r) => r.json())
       .then((cfg) => {
+        const params = new URLSearchParams(window.location.search);
         PinAsk.mount({
           hotkey: cfg.hotkey || "F9",
           endpoint: cfg.endpoint || "/api/pinask",
           storage: "server",
           showHint: Boolean(cfg.showHint),
           source: "demo",
-          context: () => ({ page: "demo" }),
+          context: () => ({
+            page: "demo",
+            project_id: params.get("project_id") || "pinask-demo",
+            environment: params.get("environment") || "local",
+            tester_id: params.get("tester_id") || "demo-tester",
+          }),
         });
       })
-      .catch(() => PinAsk.mount({ source: "demo" }));
+      .catch(() => PinAsk.mount({
+        source: "demo",
+        context: () => ({ page: "demo", project_id: "pinask-demo", environment: "local", tester_id: "demo-tester" }),
+      }));
   </script>
 </body>
 </html>

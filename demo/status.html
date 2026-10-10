@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PinAsk 状态</title>
+  <link rel="stylesheet" href="/status.css" />
+</head>
+<body>
+  <main>
+    <header class="page-head">
+      <div>
+        <p class="eyebrow">PINASK · 反馈历史</p>
+        <h1>反馈与处理会话</h1>
+        <p class="lead">查看这套 PinAsk 接入的反馈和处理会话历史。处理会话由项目自己的适配器回写；PinAsk 只保存和展示状态，不决定代码是否合并或上线。</p>
+      </div>
+      <button id="refresh" class="button primary" type="button">刷新</button>
+    </header>
+
+    <section class="summary" aria-label="状态汇总">
+      <div class="summary-card"><strong id="total-count">0</strong><span>全部</span></div>
+      <div class="summary-card"><strong id="open-count">0</strong><span>待处理</span></div>
+      <div class="summary-card"><strong id="resolved-count">0</strong><span>已处理</span></div>
+      <div class="summary-card"><strong id="ignored-count">0</strong><span>已忽略</span></div>
+      <div class="summary-card"><strong id="active-session-count">0</strong><span>处理中</span></div>
+    </section>
+
+    <section class="filters" aria-label="筛选">
+      <label>搜索问题或页面 <input id="query" type="search" placeholder="例如：按钮、/settings" /></label>
+      <label>处理人视角 <input id="tester" type="text" placeholder="可填 tester_id" /></label>
+      <label>状态
+        <select id="status">
+          <option value="">全部状态</option>
+          <option value="open">待处理</option>
+          <option value="resolved">已处理</option>
+          <option value="ignored">已忽略</option>
+        </select>
+      </label>
+      <label>会话状态
+        <select id="session-status">
+          <option value="">全部会话</option>
+          <option value="queued">排队中</option>
+          <option value="running">处理中</option>
+          <option value="waiting_test">等待确认</option>
+          <option value="succeeded">已完成</option>
+          <option value="failed">失败</option>
+        </select>
+      </label>
+      <label class="auto-refresh"><input id="auto-refresh" type="checkbox" checked /> 每 5 秒刷新</label>
+    </section>
+
+    <p id="message" class="message" role="status"></p>
+    <section id="items" class="items" aria-label="问题列表"></section>
+  </main>
+  <script src="/status.js"></script>
+</body>
+</html>
