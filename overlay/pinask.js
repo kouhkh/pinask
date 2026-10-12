@@ -32,6 +32,8 @@
     toastTimer: 0,
     wired: false,
     refreshFrame: 0,
+    lastSession: null,
+    lastAnswerId: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -339,11 +341,28 @@
     const extra = typeof state.opts.context === "function" ? state.opts.context() : (state.opts.context || {});
     return {
       href: location.href,
+      url: location.href,
       title: document.title,
       pageHeadings: [...document.querySelectorAll("h1,h2,h3,main [role=heading]")].map((node) => (node.textContent || "").replace(/\s+/g, " ").trim()).filter(Boolean).slice(0, 12),
       visualEvidence: { screenshot: "not-captured", note: "当前网页框选仅保存元素坐标；浏览器扩展接入后保存整页与裁剪截图，不默认发送给模型。" },
       ...extra,
     };
+  }
+
+  function showAnswer(result) {
+    const panel = $("pinask-answer");
+    if (!panel) return;
+    const answer = result && typeof result.answer === "string" ? result.answer.trim() : "";
+    if (!answer) {
+      panel.hidden = true;
+      panel.textContent = "";
+      return;
+    }
+    const id = (result && (result.id || result.case_id)) || "";
+    const turns = result && result.turns ? ` · 第 ${result.turns} 轮` : "";
+    panel.hidden = false;
+    panel.innerHTML = `<header>顾问回答${id ? ` · ${esc(id)}` : ""}${esc(turns)}</header><pre>${esc(answer)}</pre>`;
+    panel.scrollTop = 0;
   }
 
   function setOn(on) {
@@ -451,18 +470,30 @@
       source: state.opts.source,
       created_at: new Date().toISOString(),
     };
+    if (state.lastSession) batch.session = state.lastSession;
+    const saveBtn = $("pinask-save");
+    if (saveBtn) saveBtn.disabled = true;
     try {
       let result;
       if (typeof state.opts.onSave === "function") result = await state.opts.onSave(batch);
       else if (state.opts.storage === "local") result = await saveLocal(batch);
       else result = await saveServer(batch);
       const id = (result && (result.id || result.case_id)) || "ok";
-      showToast(`已保存本批界面问题：${id}。可继续再选。`);
+      if (result && result.session) state.lastSession = result.session;
+      if (result && typeof result.answer === "string" && result.answer.trim()) {
+        state.lastAnswerId = id;
+        showAnswer(result);
+        showToast(`已收到顾问回答：${id}。可继续追问。`);
+      } else {
+        showToast(`已保存本批界面问题：${id}。可继续再选。`);
+      }
       state.picks = [];
       $("pinask-question").value = "";
       renderMarks();
     } catch (error) {
       showToast(String(error.message || error));
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
     }
   }
 
@@ -499,8 +530,9 @@
         <p>点击选一个；拖动框选一批。同组全选时再框一次可整批取消。再按 <kbd></kbd>、右键或点退出。</p>
         <div id="pinask-picks"></div>
         <textarea id="pinask-question" rows="2" placeholder="针对这些界面元素，你想问什么？"></textarea>
+        <section id="pinask-answer" hidden></section>
         <div class="pinask-actions">
-          <button class="pinask-btn primary" type="button" id="pinask-save">保存本批</button>
+          <button class="pinask-btn primary" type="button" id="pinask-save">提交问题</button>
           <span class="pinask-group-control">
             <button class="pinask-btn" type="button" id="pinask-group-trigger" aria-haspopup="menu" aria-expanded="false"></button>
             <span id="pinask-group-menu" role="menu" hidden></span>

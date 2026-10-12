@@ -55,7 +55,8 @@
   transform: translate(var(--vera-hitl-x, 0px), var(--vera-hitl-y, 0px));
   z-index: 3;
   pointer-events: auto;
-  width: min(380px, calc(100vw - 32px));
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(72vh, 640px);
   padding: 10px 12px;
   border: 1px solid #d7deea;
   border-radius: 12px;
@@ -65,6 +66,29 @@
   flex-direction: column;
   gap: 8px;
   color: #1d2a3d;
+  overflow: auto;
+}
+#pinask-answer {
+  max-height: 220px;
+  overflow: auto;
+  padding: 8px 9px;
+  border: 1px solid #d7deea;
+  border-radius: 8px;
+  background: #f7f9fc;
+  color: #1d2a3d;
+}
+#pinask-answer[hidden] { display: none; }
+#pinask-answer header {
+  margin: 0 0 6px;
+  color: #516176;
+  font-size: 11px;
+  font-weight: 700;
+}
+#pinask-answer pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: 12px/1.45 "Segoe UI", system-ui, sans-serif;
 }
 #pinask-dock p { margin: 0; color: #5b6573; font-size: 12px; line-height: 1.45; }
 #pinask-picks { display: flex; flex-wrap: wrap; gap: 6px; min-height: 8px; }

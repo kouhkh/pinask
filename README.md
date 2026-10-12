@@ -38,7 +38,7 @@ py -3.13 server/start.py
 
 | 方法 | 路径 | 作用 |
 |------|------|------|
-| `POST` | `/api/pinask` | 保存一批（`question` + `ui_elements`） |
+| `POST` | `/api/pinask` | 保存一批（`question` + `ui_elements`）。若后端返回 `answer`，overlay 会在侧栏展示；若返回 `session`，下一次提交会带上以支持追问 |
 | `GET` | `/api/pinask?status=open` | 列出标注 |
 | `GET` | `/api/pinask/<id>` | 单条 |
 | `PATCH` | `/api/pinask/<id>` | `{"status":"resolved"}` |
