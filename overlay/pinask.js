@@ -31,6 +31,7 @@
     lastMouse: { x: 0, y: 0 },
     toastTimer: 0,
     wired: false,
+    refreshFrame: 0,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -177,11 +178,9 @@
   }
 
   function frameCandidates(frame) {
-    const selector = [
-      "button", "a[href]", "input", "textarea", "select", "option", "label", "summary", "details",
-      "[role]", "[tabindex]", "[contenteditable=true]", "[data-ui-key]", "[data-testid]",
-      "h1", "h2", "h3", "h4", "h5", "h6", "img", "li", "section", "article", "nav", "header", "footer", "main",
-    ].join(",");
+    // Display-only elements (div/span/p/table cells) are selectable too.
+    // Geometry excludes enclosing containers; tag names must not exclude UI.
+    const selector = "*";
     const rows = [];
     const seen = new Set();
     for (const el of document.querySelectorAll(selector)) {
@@ -195,7 +194,7 @@
       seen.add(item.selector);
       rows.push(item);
     }
-    return rows.slice(0, 80);
+    return rows;
   }
 
   function placeBox(node, box) {
@@ -272,15 +271,36 @@
     )).join("") + (state.groups.length < GROUP_PALETTE.length ? '<button type="button" class="pinask-group-add" id="pinask-group-add">＋ 新增一组</button>' : "");
   }
 
+  function updateMarkPositions() {
+    const marks = $("pinask-marks")?.children;
+    if (!marks) return;
+    state.picks.forEach((item, index) => {
+      const mark = marks[index];
+      if (!mark) return;
+      let el = null;
+      try { el = item.selector ? document.querySelector(item.selector) : null; } catch { /* stale selector */ }
+      const rect = el?.getBoundingClientRect();
+      mark.hidden = !rect || rect.width < 1 || rect.height < 1;
+      if (mark.hidden) return;
+      setMarkColors(mark, groupsFor(item));
+      placeRect(mark, rect);
+      item.rect = { x: Math.round(rect.left), y: Math.round(rect.top), w: Math.round(rect.width), h: Math.round(rect.height) };
+    });
+  }
+
+  function scheduleMarkRefresh() {
+    if (!state.on || state.refreshFrame) return;
+    state.refreshFrame = requestAnimationFrame(() => {
+      state.refreshFrame = 0;
+      if (!state.on) return;
+      updateMarkPositions();
+      if (!state.drag) showHover(inspectHit(state.lastMouse.x, state.lastMouse.y));
+    });
+  }
+
   function renderMarks() {
     $("pinask-marks").innerHTML = state.picks.map(() => '<div class="pinask-mark"></div>').join("");
-    const marks = $("pinask-marks").children;
-    state.picks.forEach((item, index) => {
-      const el = item.selector ? document.querySelector(item.selector) : null;
-      if (!el || !marks[index]) return;
-      setMarkColors(marks[index], groupsFor(item));
-      placeBox(marks[index], el);
-    });
+    updateMarkPositions();
     $("pinask-picks").innerHTML = orderedPicks().map((item, index) => (
       `<span class="pinask-chip" aria-label="${esc(`${index + 1}. ${item.name || item.selector}；分组：${groupsFor(item).map((group) => group.label).join("、")}`)}"><span class="pinask-chip-swatches" aria-hidden="true">${groupsFor(item).map((group) => `<i style="--pinask-group-color:${esc(group.color)}"></i>`).join("")}</span>${index + 1}. ${esc(item.name || item.selector)}</span>`
     )).join("") || "";
@@ -527,6 +547,9 @@
   function wire() {
     if (state.wired) return;
     state.wired = true;
+    // scroll does not bubble; capture nested scrolling as well as window scroll.
+    window.addEventListener("scroll", scheduleMarkRefresh, { capture: true, passive: true });
+    window.addEventListener("resize", scheduleMarkRefresh, { passive: true });
     document.addEventListener("mousemove", (event) => {
       state.lastMouse = { x: event.clientX, y: event.clientY };
       if (!state.on) return;
